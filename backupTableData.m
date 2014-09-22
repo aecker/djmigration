@@ -42,6 +42,12 @@ host = getenv('DJ_HOST');
 user = getenv('DJ_USER');
 pass = getenv('DJ_PASS');
 
+% use separate inserts for large tables
+res = mym(sprintf('SELECT data_length / pow(2, 30) as size FROM information_schema.tables WHERE table_schema = "%s" and table_name = "%s"', db, tab));
+if res.size > 0.8
+    args = [args ' --extended-insert=FALSE'];
+end
+
 cmd = sprintf('mysqldump -h%s -u%s -p%s %s %s "%s" "%s" %s', host, user, pass, args, where, db, tab, output);
 fprintf('%s.%s\n', db, tab);
 system(cmd);
